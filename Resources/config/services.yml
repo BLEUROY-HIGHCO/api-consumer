@@ -1,0 +1,26 @@
+parameters:
+    api_consumer_bundle.http_client.class: GuzzleHttp\Client
+    api_consumer_bundle.middleware.class: GuzzleHttp\Middleware
+    api_consumer_bundle.formatter.class: GuzzleHttp\MessageFormatter
+    guzzle_bundle.data_collector.class: Highco\ApiConsumerBundle\DataCollector\HttpDataCollector
+    guzzle_bundle.logger.class: Highco\ApiConsumerBundle\Log\Logger
+    guzzle_bundle.middleware.log.class: Highco\ApiConsumerBundle\Middleware\LogMiddleware
+    guzzle_bundle.middleware.event_dispatcher.class: Highco\ApiConsumerBundle\Middleware\EventDispatchMiddleware
+    guzzle_bundle.plugin.header.headers:
+
+services:
+    guzzle_bundle.formatter:
+        class: '%api_consumer_bundle.formatter.class%'
+
+    guzzle_bundle.data_collector:
+        class: '%guzzle_bundle.data_collector.class%'
+        arguments:
+            - "@guzzle_bundle.logger"
+        tags:
+            - { name: data_collector, template: GuzzleBundle::debug, id: api_consumer_bundle }
+
+    api_converter:
+        class: Highco\ApiConsumerBundle\Request\ParamConverter\ApiConverter
+        tags:
+            - { name: request.param_converter , converter: api_converter }
+        arguments: ['@service_container']
